@@ -1,22 +1,21 @@
 import { toHex } from '../../lib/color';
 import type { Chart } from '../../lib/quantize';
-import { renderChart, type RenderOptions, type RenderTheme } from '../../lib/render';
+import { pageRule, printRenderOptions, type PrintOptions } from '../../lib/print';
+import { renderChart, type RenderTheme } from '../../lib/render';
 import { Swatch } from '../atoms';
 import { el } from '../dom';
-import type { PrintSettings } from './chart-settings';
 import './print-sheet.css';
 
 /** Long side of the printed chart bitmap, in device pixels: sharp at A3 without huge memory use. */
 const TARGET_PIXELS = 4000;
 
-const PRINT_THEME: RenderTheme = { background: '#ffffff', muted: '#555555', font: '"IBM Plex Mono", monospace' };
+export const PRINT_THEME: RenderTheme = { background: '#ffffff', muted: '#555555', font: '"IBM Plex Mono", monospace' };
 
 export interface PrintJob {
   title: string;
   summary: string;
   chart: Chart;
-  options: RenderOptions;
-  settings: PrintSettings;
+  options: PrintOptions;
 }
 
 export interface PrintSheetHandle {
@@ -33,23 +32,22 @@ export function PrintSheet(): PrintSheetHandle {
 
   return {
     root,
-    prepare({ title, summary, chart, options, settings }) {
+    prepare({ title, summary, chart, options }) {
       const canvas = el('canvas', { className: 'print-sheet__canvas', attrs: { role: 'img', 'aria-label': 'Printed chart' } });
-      const longSide = Math.max(chart.width, chart.height) * options.cellSize;
-      renderChart(canvas, chart, options, PRINT_THEME, Math.min(8, Math.max(2, TARGET_PIXELS / longSide)));
+      const render = printRenderOptions(options);
+      const longSide = Math.max(chart.width, chart.height) * render.cellSize;
+      renderChart(canvas, chart, render, PRINT_THEME, Math.min(8, Math.max(2, TARGET_PIXELS / longSide)));
 
-      const orientation =
-        settings.orientation === 'auto' ? (chart.width > chart.height ? 'landscape' : 'portrait') : settings.orientation;
-      pageStyle.textContent = `@page { size: ${settings.paper} ${orientation}; margin: 10mm; }`;
+pageStyle.textContent = pageRule(options, chart);
 
       const chartPage = el('section', { className: 'print-sheet__chart-page' }, [
-        settings.includeTitle && el('h1', { className: 'print-sheet__title', text: title }),
-        settings.includeTitle && el('p', { className: 'print-sheet__summary', text: summary }),
+        options.includeTitle && el('h1', { className: 'print-sheet__title', text: title }),
+        options.includeTitle && el('p', { className: 'print-sheet__summary', text: summary }),
         canvas,
       ]);
 
       const palette =
-        settings.includePalette &&
+        options.includePalette &&
         el('section', { className: 'print-sheet__palette' }, [
           el('h2', { text: `Colors · ${title}` }),
           el('table', { className: 'print-sheet__table' }, [

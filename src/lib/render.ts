@@ -5,6 +5,8 @@ export interface RenderOptions {
   /** Size of one square in CSS pixels. */
   cellSize: number;
   showNumbers: boolean;
+  /** Fill squares with their paint color (default). Off gives a blank outline chart to paint on. */
+  showColors?: boolean;
   showCoordinates: boolean;
   showGridLines: boolean;
   /** Palette index to highlight, or -1 for none. */
@@ -46,7 +48,7 @@ export function renderChart(
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const { width: W, height: H, cells, palette } = chart;
-  const { cellSize: s, showNumbers, showCoordinates, showGridLines, highlight } = options;
+  const { cellSize: s, showNumbers, showCoordinates, showGridLines, highlight, showColors = true } = options;
 
   const margin = showCoordinates ? Math.max(18, s * 0.8) : 0;
   const dpr = pixelRatio;
@@ -69,6 +71,7 @@ export function renderChart(
       const X = margin + x * s;
       const Y = margin + y * s;
       if (v < 0) {
+        if (!showColors) continue; // transparent pixel on an outline chart: leave it blank
         // Transparent pixel: checkerboard, nothing to paint.
         ctx.fillStyle = '#ccc';
         ctx.fillRect(X, Y, s, s);
@@ -80,11 +83,12 @@ export function renderChart(
       const paint = palette[v]!;
       const dimmed = highlight >= 0 && highlight !== v;
       ctx.globalAlpha = dimmed ? DIMMED_ALPHA : 1;
-      ctx.fillStyle = toCss(paint);
+      ctx.fillStyle = showColors ? toCss(paint) : '#ffffff';
       ctx.fillRect(X, Y, s, s);
       ctx.globalAlpha = 1;
       if (showNumbers && s >= MIN_CELL_FOR_NUMBERS && !dimmed) {
-        ctx.fillStyle = luminance(paint) > 140 ? 'rgba(0,0,0,.8)' : 'rgba(255,255,255,.92)';
+        const light = !showColors || luminance(paint) > 140;
+        ctx.fillStyle = light ? 'rgba(0,0,0,.8)' : 'rgba(255,255,255,.92)';
         ctx.font = `600 ${Math.floor(s * (paint.number > 99 ? 0.34 : 0.42))}px ${theme.font}`;
         ctx.fillText(String(paint.number), X + s / 2, Y + s / 2 + 0.5);
       }

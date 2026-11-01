@@ -105,7 +105,8 @@ test('clicking a paint highlights it, clicking again clears it', async ({ page }
 });
 
 test('the chart is drawn in the palette colors', async ({ page }) => {
-  for (const label of ['Show numbers', 'Show coordinates', 'Grid lines']) await page.getByLabel(label).uncheck();
+  const settings = page.getByRole('region', { name: 'Chart settings' });
+  for (const label of ['Show numbers', 'Show coordinates', 'Grid lines']) await settings.getByLabel(label).uncheck();
   // Sample the middle of the top-left square, in device pixels.
   const cell = parseInt(await page.locator('.range-field', { hasText: 'Cell size' }).locator('output').innerText(), 10);
   const hex = await page.getByRole('img', { name: 'Paint-by-numbers chart' }).evaluate((canvas: HTMLCanvasElement, cell) => {
@@ -119,7 +120,7 @@ test('the chart is drawn in the palette colors', async ({ page }) => {
 test('display options change the canvas without changing the palette', async ({ page }) => {
   const canvas = page.getByRole('img', { name: 'Paint-by-numbers chart' });
   const before = (await canvas.boundingBox())!.width;
-  await page.getByLabel('Show coordinates').uncheck();
+  await page.getByRole('region', { name: 'Chart settings' }).getByLabel('Show coordinates').uncheck();
   await expect.poll(async () => (await canvas.boundingBox())!.width).toBeLessThan(before);
   await page.getByLabel('Cell size').fill('12');
   await expect.poll(async () => (await canvas.boundingBox())!.width).toBeLessThan(16 * 13);

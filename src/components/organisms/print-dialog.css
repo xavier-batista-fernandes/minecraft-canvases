@@ -1,0 +1,15 @@
+.print-dialog__layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 760px) { .print-dialog__layout { grid-template-columns: minmax(0, 1fr); } }
+.print-dialog__options { display: grid; gap: 14px; }
+.print-dialog__preview { display: grid; gap: 10px; padding: 16px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); min-width: 0; }
+.print-dialog__pages { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; align-items: flex-start; }
+.print-dialog__pages .paper-preview { width: min(100%, 300px); }
+.print-dialog__pages .paper-preview--landscape { width: min(100%, 420px); }
+.print-dialog__pages .paper-preview__sheet { container-type: inline-size; }
+.print-dialog__title { margin: 0; font-family: var(--display); font-weight: 400; font-size: 6cqw; line-height: 1.1; }
+.print-dialog__summary { margin: 0; font-family: var(--mono); font-size: 2.6cqw; color: #444; }
+.print-dialog__canvas { flex: 1 1 auto; min-height: 0; width: 100% !important; height: 100% !important; object-fit: contain; object-position: top center; }
+.print-dialog__list-title { margin: 0; font-family: var(--display); font-weight: 400; font-size: 4.5cqw; }
+.print-dialog__list { display: grid; gap: .8cqw; font-family: var(--mono); font-size: 2.4cqw; }
+.print-dialog__list-row { display: grid; grid-template-columns: 5cqw 7cqw 1fr auto; gap: 2cqw; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: .6cqw; }
+.print-dialog__list-row .swatch { width: 7cqw; height: 3.5cqw; border-radius: 1px; }

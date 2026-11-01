@@ -5,7 +5,8 @@ import { loadImageData } from '../../lib/image';
 import { buildChart, countColors, type Chart } from '../../lib/quantize';
 import { fitCellSize } from '../../lib/render';
 import { ChartSummary } from '../molecules';
-import { ChartCanvas, ChartSettings, PaintingPicker, PalettePanel, PrintSheet, SiteHeader } from '../organisms';
+import type { PrintOptions } from '../../lib/print';
+import { ChartCanvas, ChartSettings, PaintingPicker, PalettePanel, PrintDialog, PrintSheet, SiteHeader } from '../organisms';
 import { WorkbenchTemplate } from '../templates';
 
 const STORAGE_KEY = 'painting';
@@ -42,6 +43,12 @@ export function ChartPage(): HTMLElement {
   const summary = ChartSummary();
   const canvas = ChartCanvas();
   const printSheet = PrintSheet();
+  const printDialog = PrintDialog({
+    onPrint: (options) => {
+      preparePrint(options);
+      window.print();
+    },
+  });
   const palette = PalettePanel({
     onToggle: (i) => {
       state.highlight = state.highlight === i ? -1 : i;
@@ -59,7 +66,9 @@ export function ChartPage(): HTMLElement {
   const settings = ChartSettings({
     onDisplayChange: () => draw(),
     onAnalysisChange: () => refresh(),
-    onPrint: () => window.print(),
+    onPrint: () => {
+      if (state.chart) printDialog.open({ title: state.title, summary: summaryText(), chart: state.chart });
+    },
   });
   const picker = PaintingPicker({ paintings: PAINTINGS, onSelect: (p) => void selectPainting(p) });
 
@@ -82,15 +91,13 @@ export function ChartPage(): HTMLElement {
     draw();
   }
 
-  function preparePrint(): void {
+  function summaryText(): string {
+    return [...summary.root.children].map((c) => c.textContent).join(' · ');
+  }
+
+  function preparePrint(options: PrintOptions = printDialog.options()): void {
     if (!state.chart) return;
-    printSheet.prepare({
-      title: state.title,
-      summary: [...summary.root.children].map((c) => c.textContent).join(' · '),
-      chart: state.chart,
-      options: { ...settings.display(), highlight: state.highlight },
-      settings: settings.print(),
-    });
+    printSheet.prepare({ title: state.title, summary: summaryText(), chart: state.chart, options });
   }
 
   async function selectPainting(painting: Painting): Promise<void> {
@@ -113,9 +120,8 @@ export function ChartPage(): HTMLElement {
     }
   }
 
-  // Build the printed pages from the current settings, whether printing starts from the
-  // button or from the browser (Ctrl/Cmd+P).
-  window.addEventListener('beforeprint', preparePrint);
+  // Printing from the browser (Ctrl/Cmd+P) uses the options last chosen in the print dialog.
+  window.addEventListener('beforeprint', () => preparePrint());
   // The canvas uses theme colors and a web font, so redraw when either changes.
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
   new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
@@ -135,5 +141,6 @@ export function ChartPage(): HTMLElement {
     chart: canvas.root,
     palette: palette.root,
     print: printSheet.root,
+    overlays: [printDialog.root],
   });
 }
