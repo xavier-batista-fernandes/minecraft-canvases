@@ -7,7 +7,7 @@ import './chart-settings.css';
 export type DisplaySettings = Omit<RenderOptions, 'highlight'>;
 
 export interface AnalysisSettings {
-  /** Maximum number of paints; Infinity keeps every exact color. */
+  /** Maximum number of paints. At the painting's own color count, nothing is simplified. */
   maxColors: number;
 }
 
@@ -35,19 +35,24 @@ export interface ChartSettingsHandle {
   print: () => PrintSettings;
   /** Set the cell size without firing a change (used when a new painting loads). */
   setCellSize: (size: number) => void;
+  /**
+   * Let the paint color slider run from 1 to `count` (the painting's exact colors), keeping the
+   * current choice when it still fits. Does not fire a change.
+   */
+  setColorCount: (count: number) => void;
 }
 
-const COLORS_MIN = 2;
-/** The slider's top value means "keep every exact color". */
-const COLORS_ALL = 65;
 const COLORS_DEFAULT = 24;
 
 export function ChartSettings({ onDisplayChange, onAnalysisChange, onPrint }: ChartSettingsProps): ChartSettingsHandle {
   const display: DisplaySettings = { cellSize: 30, showNumbers: true, showCoordinates: true, showGridLines: true };
   const print: PrintSettings = { paper: 'A4', orientation: 'auto', includeTitle: true, includePalette: true };
   let colors = COLORS_DEFAULT;
+  /** Colors in the current painting; the slider's top end. */
+  let colorCount = COLORS_DEFAULT;
+  let hasColorCount = false;
 
-  const analysis = (): AnalysisSettings => ({ maxColors: colors >= COLORS_ALL ? Infinity : colors });
+  const analysis = (): AnalysisSettings => ({ maxColors: colors });
   const setDisplay = <K extends keyof DisplaySettings>(key: K, value: DisplaySettings[K]) => {
     display[key] = value;
     onDisplayChange({ ...display });
@@ -68,22 +73,30 @@ export function ChartSettings({ onDisplayChange, onAnalysisChange, onPrint }: Ch
     );
   renderCellSize();
 
+  // Rebuilt whenever a painting with a different number of colors loads.
+  const colorsSlot = el('div');
+  const renderColors = () =>
+    colorsSlot.replaceChildren(
+      RangeField({
+        label: 'Paint colors',
+        min: 1,
+        max: colorCount,
+        value: colors,
+        format: (v) => (v === colorCount ? `${v} (all)` : String(v)),
+        onInput: (v) => {
+          colors = v;
+          onAnalysisChange(analysis());
+        },
+      }),
+    );
+  renderColors();
+
   const root = Panel(
     [
       SectionHeader('Chart settings', Button({ label: 'Print chart', onClick: onPrint })),
       el('div', { className: 'chart-settings__groups' }, [
         SettingsGroup('Colors', [
-          RangeField({
-            label: 'Paint colors',
-            min: COLORS_MIN,
-            max: COLORS_ALL,
-            value: colors,
-            format: (v) => (v >= COLORS_ALL ? 'All' : String(v)),
-            onInput: (v) => {
-              colors = v;
-              onAnalysisChange(analysis());
-            },
-          }),
+          colorsSlot,
           Text('Fewer colors are easier to mix. Paints are numbered from dark to light.', { tone: 'muted', size: 'sm' }),
         ]),
         SettingsGroup('Display', [
@@ -132,6 +145,14 @@ export function ChartSettings({ onDisplayChange, onAnalysisChange, onPrint }: Ch
     setCellSize(size) {
       display.cellSize = size;
       renderCellSize();
+    },
+    setColorCount(count) {
+      const wasAll = hasColorCount && colors === colorCount;
+      hasColorCount = true;
+      colorCount = Math.max(1, count);
+      // "All colors" stays "all colors" on the next painting; anything else is kept, capped.
+      colors = wasAll ? colorCount : Math.min(colors, colorCount);
+      renderColors();
     },
   };
 }

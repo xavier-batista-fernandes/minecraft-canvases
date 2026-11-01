@@ -2,7 +2,7 @@ import { DEFAULT_PAINTING_ID, PAINTINGS, paintingUrl, type Painting } from '../.
 import { resolveCrop } from '../../lib/crop';
 import { paletteToText } from '../../lib/export';
 import { loadImageData } from '../../lib/image';
-import { buildChart, type Chart } from '../../lib/quantize';
+import { buildChart, countColors, type Chart } from '../../lib/quantize';
 import { fitCellSize } from '../../lib/render';
 import { ChartSummary } from '../molecules';
 import { ChartCanvas, ChartSettings, PaintingPicker, PalettePanel, PrintSheet, SiteHeader } from '../organisms';
@@ -105,6 +105,8 @@ export function ChartPage(): HTMLElement {
       state.title = painting.name;
       state.highlight = -1;
       settings.setCellSize(fitCellSize(source.width, canvas.availableWidth()));
+      const area = resolveCrop(source.width, source.height);
+      if (area) settings.setColorCount(countColors(source, area));
       refresh();
     } catch {
       palette.notify(`Could not load ${painting.name}.`);
