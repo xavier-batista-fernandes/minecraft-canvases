@@ -1,7 +1,4 @@
-import { fileURLToPath } from 'node:url';
 import { expect, paintingCard, paletteRows, summary, test } from './fixtures';
-
-const fixture = (name: string) => fileURLToPath(new URL(`../public/paintings/${name}`, import.meta.url));
 
 test.beforeEach(async ({ page }) => {
   await page.goto('./');
@@ -21,8 +18,19 @@ test('opens on the default painting with a full chart and palette', async ({ pag
   await expect(paletteRows(page)).toHaveCount(24);
   const canvas = page.getByRole('img', { name: 'Paint-by-numbers chart' });
   await expect(canvas).toBeVisible();
-  const box = await canvas.boundingBox();
-  expect(box!.width).toBeGreaterThan(16 * 30);
+});
+
+test('the chart fills the available width', async ({ page }) => {
+  const canvas = page.getByRole('img', { name: 'Paint-by-numbers chart' });
+  const container = page.getByRole('region', { name: 'Chart' }).locator('.chart-canvas__scroll');
+  const [chartWidth, containerWidth] = [(await canvas.boundingBox())!.width, (await container.boundingBox())!.width];
+  expect(chartWidth).toBeLessThanOrEqual(containerWidth);
+  expect(chartWidth).toBeGreaterThan(containerWidth * 0.85);
+});
+
+test('there is no image upload', async ({ page }) => {
+  await expect(page.locator('input[type=file]')).toHaveCount(0);
+  await expect(page.getByText('Choose a PNG')).toHaveCount(0);
 });
 
 test('lists every painting, grouped by size', async ({ page }) => {
@@ -63,7 +71,7 @@ test('the paint colors slider simplifies the palette', async ({ page }) => {
   await expect(summary(page)).toContainText(/4 paint colors \(simplified from \d+\)/);
 
   await slider.fill('65');
-  await expect(page.getByText('Paint colors: All')).toBeVisible();
+  await expect(page.locator('.range-field', { hasText: 'Paint colors' }).locator('output')).toHaveText('All');
   await expect(summary(page)).not.toContainText('simplified');
 });
 
@@ -78,12 +86,12 @@ test('clicking a paint highlights it, clicking again clears it', async ({ page }
 test('the chart is drawn in the palette colors', async ({ page }) => {
   for (const label of ['Show numbers', 'Show coordinates', 'Grid lines']) await page.getByLabel(label).uncheck();
   // Sample the middle of the top-left square, in device pixels.
-  const hex = await page.getByRole('img', { name: 'Paint-by-numbers chart' }).evaluate((canvas: HTMLCanvasElement) => {
+  const cell = parseInt(await page.locator('.range-field', { hasText: 'Cell size' }).locator('output').innerText(), 10);
+  const hex = await page.getByRole('img', { name: 'Paint-by-numbers chart' }).evaluate((canvas: HTMLCanvasElement, cell) => {
     const scale = canvas.width / canvas.getBoundingClientRect().width;
-    const cell = 40; // suggested cell size for a 16×16 painting
     const [r, g, b] = canvas.getContext('2d')!.getImageData(Math.floor((cell / 2) * scale), Math.floor((cell / 2) * scale), 1, 1).data;
     return '#' + [r, g, b].map((v) => v!.toString(16).padStart(2, '0')).join('').toUpperCase();
-  });
+  }, cell);
   await expect(page.getByRole('list', { name: 'Paint colors' })).toContainText(hex);
 });
 
@@ -101,35 +109,9 @@ test('copy list puts the palette on the clipboard', async ({ page, context, brow
   test.skip(browserName !== 'chromium', 'clipboard permissions are Chromium-only');
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.getByRole('button', { name: 'Copy list' }).click();
-  await expect(page.getByRole('status')).toHaveText('Copied the color list.');
+  await expect(page.getByRole('complementary', { name: 'Palette' }).getByRole('status')).toHaveText('Copied the color list.');
   const text = await page.evaluate(() => navigator.clipboard.readText());
   expect(text.split('\n')[0]).toBe('Kebab med tre pepperoni (16x16)');
   expect(text.split('\n')).toHaveLength(25);
   expect(text).toMatch(/^1\t#[0-9A-F]{6}\tRGB\(\d+, \d+, \d+\)\t\d+ squares$/m);
-});
-
-test('uploading a PNG charts it and clears the picker selection', async ({ page }) => {
-  await page.locator('input[type=file]').setInputFiles(fixture('pool.png'));
-  await expect(summary(page)).toContainText('pool.png');
-  await expect(summary(page)).toContainText('32×16 pixels · 2×1 blocks');
-  await expect(page.locator('.painting-card[aria-pressed="true"]')).toHaveCount(0);
-});
-
-test('rejects a file that is not an image', async ({ page }) => {
-  await page.locator('input[type=file]').setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hi') });
-  await expect(page.getByRole('status')).toHaveText('That file is not an image. Choose a PNG.');
-  await expect(summary(page)).toContainText('Kebab med tre pepperoni');
-});
-
-test('crop picks a section of the image and can be reset', async ({ page }) => {
-  await page.locator('input[type=file]').setInputFiles(fixture('pointer.png'));
-  await expect(summary(page)).toContainText('64×64 pixels');
-  await page.getByText(/^Crop a section/).click();
-  await page.getByLabel('X', { exact: true }).fill('16');
-  await page.getByLabel('Width', { exact: true }).fill('32');
-  await page.getByLabel('Height', { exact: true }).fill('16');
-  await expect(summary(page)).toContainText('32×16 pixels · 2×1 blocks');
-  await page.getByRole('button', { name: 'Use whole image' }).click();
-  await expect(summary(page)).toContainText('64×64 pixels');
-  await expect(page.getByLabel('Width', { exact: true })).toHaveValue('0');
 });
