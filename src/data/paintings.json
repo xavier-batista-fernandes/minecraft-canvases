@@ -1,0 +1,302 @@
+[
+  {
+    "id": "kebab",
+    "name": "Kebab med tre pepperoni",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "id": "aztec",
+    "name": "de_aztec",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "id": "alban",
+    "name": "Albanian",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "id": "aztec2",
+    "name": "de_aztec (2)",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "id": "bomb",
+    "name": "Target Successfully Bombed",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "id": "plant",
+    "name": "Paradisträd",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "id": "wasteland",
+    "name": "Wasteland",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "id": "meditative",
+    "name": "Meditative",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "id": "pool",
+    "name": "The Pool",
+    "width": 32,
+    "height": 16
+  },
+  {
+    "id": "courbet",
+    "name": "Bonjour Monsieur Courbet",
+    "width": 32,
+    "height": 16
+  },
+  {
+    "id": "sea",
+    "name": "Seaside",
+    "width": 32,
+    "height": 16
+  },
+  {
+    "id": "sunset",
+    "name": "sunset_dense",
+    "width": 32,
+    "height": 16
+  },
+  {
+    "id": "creebet",
+    "name": "Creebet",
+    "width": 32,
+    "height": 16
+  },
+  {
+    "id": "wanderer",
+    "name": "Wanderer",
+    "width": 16,
+    "height": 32
+  },
+  {
+    "id": "graham",
+    "name": "Graham",
+    "width": 16,
+    "height": 32
+  },
+  {
+    "id": "prairie_ride",
+    "name": "Prairie Ride",
+    "width": 16,
+    "height": 32
+  },
+  {
+    "id": "match",
+    "name": "Match",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "bust",
+    "name": "Bust",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "stage",
+    "name": "The Stage Is Set",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "void",
+    "name": "The void",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "skull_and_roses",
+    "name": "Skull and Roses",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "wither",
+    "name": "Wither",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "earth",
+    "name": "Earth",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "wind",
+    "name": "Wind",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "water",
+    "name": "Water",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "fire",
+    "name": "Fire",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "baroque",
+    "name": "Baroque",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "humble",
+    "name": "Humble",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "id": "bouquet",
+    "name": "Bouquet",
+    "width": 48,
+    "height": 48
+  },
+  {
+    "id": "cavebird",
+    "name": "Cavebird",
+    "width": 48,
+    "height": 48
+  },
+  {
+    "id": "cotan",
+    "name": "Cotán",
+    "width": 48,
+    "height": 48
+  },
+  {
+    "id": "endboss",
+    "name": "Endboss",
+    "width": 48,
+    "height": 48
+  },
+  {
+    "id": "fern",
+    "name": "Fern",
+    "width": 48,
+    "height": 48
+  },
+  {
+    "id": "owlemons",
+    "name": "Owlemons",
+    "width": 48,
+    "height": 48
+  },
+  {
+    "id": "sunflowers",
+    "name": "Sunflowers",
+    "width": 48,
+    "height": 48
+  },
+  {
+    "id": "tides",
+    "name": "Tides",
+    "width": 48,
+    "height": 48
+  },
+  {
+    "id": "backyard",
+    "name": "Backyard",
+    "width": 48,
+    "height": 64
+  },
+  {
+    "id": "pond",
+    "name": "Pond",
+    "width": 48,
+    "height": 64
+  },
+  {
+    "id": "fighters",
+    "name": "Fighters",
+    "width": 64,
+    "height": 32
+  },
+  {
+    "id": "changing",
+    "name": "Changing",
+    "width": 64,
+    "height": 32
+  },
+  {
+    "id": "finding",
+    "name": "Finding",
+    "width": 64,
+    "height": 32
+  },
+  {
+    "id": "lowmist",
+    "name": "Lowmist",
+    "width": 64,
+    "height": 32
+  },
+  {
+    "id": "passage",
+    "name": "Passage",
+    "width": 64,
+    "height": 32
+  },
+  {
+    "id": "donkey_kong",
+    "name": "Kong",
+    "width": 64,
+    "height": 48
+  },
+  {
+    "id": "skeleton",
+    "name": "Mortal Coil",
+    "width": 64,
+    "height": 48
+  },
+  {
+    "id": "pointer",
+    "name": "Pointer",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "id": "pigscene",
+    "name": "Pigscene",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "id": "burning_skull",
+    "name": "Skull On Fire",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "id": "orb",
+    "name": "Orb",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "id": "unpacked",
+    "name": "Unpacked",
+    "width": 64,
+    "height": 64
+  }
+]
