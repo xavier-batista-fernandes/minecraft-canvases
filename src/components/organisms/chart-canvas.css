@@ -1,2 +1,2 @@
-.chart-canvas__scroll { overflow: auto; max-height: 80vh; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); }
-.chart-canvas__canvas { display: block; image-rendering: pixelated; }
+.chart-canvas__scroll { overflow: auto; max-height: 85vh; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); }
+.chart-canvas__canvas { display: block; margin: 0 auto; image-rendering: pixelated; }

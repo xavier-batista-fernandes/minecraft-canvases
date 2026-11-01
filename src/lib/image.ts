@@ -15,13 +15,3 @@ export function loadImageData(url: string): Promise<ImageData> {
     img.src = url;
   });
 }
-
-/** Decode a user-supplied file (upload, drop or paste). */
-export async function fileToImageData(file: Blob): Promise<ImageData> {
-  const url = URL.createObjectURL(file);
-  try {
-    return await loadImageData(url);
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}

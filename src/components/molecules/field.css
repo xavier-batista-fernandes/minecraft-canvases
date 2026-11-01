@@ -1,3 +1,2 @@
 .field { display: grid; gap: 4px; font-size: 13px; }
 .field__label { color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
-.field__value { color: var(--fg); font-family: var(--mono); }

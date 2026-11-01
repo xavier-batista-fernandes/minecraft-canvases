@@ -8,22 +8,18 @@ export interface WorkbenchSlots {
   summary: Node;
   chart: Node;
   palette: Node;
-  guide: Node;
+  /** Shown only when printing; everything else is hidden then. */
+  print: Node;
 }
 
 /**
- * A painter's worktable: header and controls on top, the chart as the canvas with the palette
- * beside it (stacked on phones), and the guide at the bottom. Layout only, no behavior.
+ * A painter's worktable: header and controls on top, then the chart at full width with the
+ * palette under it. Layout only, no behavior.
  */
 export function WorkbenchTemplate(slots: WorkbenchSlots): HTMLElement {
   return el('div', { className: 'workbench' }, [
     slots.header,
-    el('main', { className: 'workbench__body' }, [
-      slots.picker,
-      slots.settings,
-      slots.summary,
-      el('div', { className: 'workbench__split' }, [slots.chart, slots.palette]),
-      slots.guide,
-    ]),
+    el('main', { className: 'workbench__body' }, [slots.picker, slots.settings, slots.summary, slots.chart, slots.palette]),
+    el('div', { className: 'workbench__print' }, [slots.print]),
   ]);
 }

@@ -25,3 +25,9 @@ export function el<K extends keyof HTMLElementTagNameMap>(
 export function cx(...names: (string | false | null | undefined)[]): string {
   return names.filter(Boolean).join(' ');
 }
+
+let nextId = 0;
+/** A page-unique id, for wiring labels to controls. */
+export function uid(prefix: string): string {
+  return `${prefix}-${++nextId}`;
+}

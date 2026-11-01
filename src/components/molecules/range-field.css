@@ -1,0 +1,4 @@
+.range-field { display: grid; gap: 6px; }
+.range-field__top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 14px; }
+.range-field__value { font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+.range-field .slider { width: 100%; margin: 0; }
