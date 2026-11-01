@@ -1,8 +1,7 @@
-import type { CropRect } from '../../lib/crop';
-import type { RenderOptions } from '../../lib/render';
-import { Button, Checkbox, NumberInput, Panel, Slider, Text } from '../atoms';
+import { MAX_CELL_SIZE, MIN_CELL_SIZE, type RenderOptions } from '../../lib/render';
+import { Button, Panel, Switch, Text } from '../atoms';
 import { el } from '../dom';
-import { Field, FieldValue, FileDrop, SectionHeader } from '../molecules';
+import { RangeField, SectionHeader, SegmentedControl, SettingsGroup } from '../molecules';
 import './chart-settings.css';
 
 export type DisplaySettings = Omit<RenderOptions, 'highlight'>;
@@ -10,25 +9,32 @@ export type DisplaySettings = Omit<RenderOptions, 'highlight'>;
 export interface AnalysisSettings {
   /** Maximum number of paints; Infinity keeps every exact color. */
   maxColors: number;
-  crop: CropRect;
+}
+
+export type PaperSize = 'A4' | 'Letter' | 'A3';
+export type Orientation = 'auto' | 'portrait' | 'landscape';
+
+export interface PrintSettings {
+  paper: PaperSize;
+  /** "auto" picks landscape for charts wider than they are tall. */
+  orientation: Orientation;
+  includeTitle: boolean;
+  includePalette: boolean;
 }
 
 export interface ChartSettingsProps {
   onDisplayChange: (settings: DisplaySettings) => void;
   onAnalysisChange: (settings: AnalysisSettings) => void;
-  onFile: (file: File | undefined) => void;
+  onPrint: () => void;
 }
 
 export interface ChartSettingsHandle {
   root: HTMLElement;
   display: () => DisplaySettings;
   analysis: () => AnalysisSettings;
-  /** Set the cell size without firing a change (used when a new image loads). */
+  print: () => PrintSettings;
+  /** Set the cell size without firing a change (used when a new painting loads). */
   setCellSize: (size: number) => void;
-  /** Back to "whole image" without firing a change. */
-  resetCrop: () => void;
-  /** Tooltip on the paint count telling how many exact colors the original has. */
-  setOriginalColorCount: (count: number) => void;
 }
 
 const COLORS_MIN = 2;
@@ -36,69 +42,83 @@ const COLORS_MIN = 2;
 const COLORS_ALL = 65;
 const COLORS_DEFAULT = 24;
 
-export function ChartSettings({ onDisplayChange, onAnalysisChange, onFile }: ChartSettingsProps): ChartSettingsHandle {
+export function ChartSettings({ onDisplayChange, onAnalysisChange, onPrint }: ChartSettingsProps): ChartSettingsHandle {
   const display: DisplaySettings = { cellSize: 30, showNumbers: true, showCoordinates: true, showGridLines: true };
+  const print: PrintSettings = { paper: 'A4', orientation: 'auto', includeTitle: true, includePalette: true };
   let colors = COLORS_DEFAULT;
-  const crop: CropRect = { x: 0, y: 0, width: 0, height: 0 };
 
-  const analysis = (): AnalysisSettings => ({ maxColors: colors >= COLORS_ALL ? Infinity : colors, crop: { ...crop } });
-  const displayChanged = () => onDisplayChange({ ...display });
-  const analysisChanged = () => onAnalysisChange(analysis());
-
-  const cellSize = Slider({ min: 12, max: 48, value: display.cellSize, onInput: (v) => ((display.cellSize = v), displayChanged()) });
-  const colorsValue = FieldValue(String(colors));
-  const colorsSlider = Slider({
-    min: COLORS_MIN,
-    max: COLORS_ALL,
-    value: colors,
-    onInput: (v) => {
-      colors = v;
-      colorsValue.textContent = v >= COLORS_ALL ? 'All' : String(v);
-      analysisChanged();
-    },
-  });
-
-  const cropInputs = (['x', 'y', 'width', 'height'] as const).map((key) => ({
-    key,
-    input: NumberInput({ value: 0, onInput: (v) => ((crop[key] = v), analysisChanged()) }),
-  }));
-  const resetCrop = () => {
-    cropInputs.forEach(({ key, input }) => {
-      crop[key] = 0;
-      input.value = '0';
-    });
+  const analysis = (): AnalysisSettings => ({ maxColors: colors >= COLORS_ALL ? Infinity : colors });
+  const setDisplay = <K extends keyof DisplaySettings>(key: K, value: DisplaySettings[K]) => {
+    display[key] = value;
+    onDisplayChange({ ...display });
   };
-  const cropLabels = { x: 'X', y: 'Y', width: 'Width', height: 'Height' };
+
+  // The cell size slider is rebuilt when a new painting suggests a size, so keep a slot for it.
+  const cellSlot = el('div');
+  const renderCellSize = () =>
+    cellSlot.replaceChildren(
+      RangeField({
+        label: 'Cell size',
+        min: MIN_CELL_SIZE,
+        max: MAX_CELL_SIZE,
+        value: display.cellSize,
+        format: (v) => `${v} px`,
+        onInput: (v) => setDisplay('cellSize', v),
+      }),
+    );
+  renderCellSize();
 
   const root = Panel(
     [
-      SectionHeader('Chart settings'),
-      FileDrop({
-        accept: 'image/png,image/*',
-        onFile,
-        label: [
-          "Want a painting that isn't listed, or one from a resource pack? ",
-          el('strong', { text: 'Choose a PNG' }),
-          ', drag it here, or paste it.',
-        ],
-      }),
-      el('div', { className: 'chart-settings__controls' }, [
-        Field({ label: 'Cell size', control: cellSize }),
-        Checkbox({ label: 'Show numbers', checked: display.showNumbers, onChange: (v) => ((display.showNumbers = v), displayChanged()) }),
-        Checkbox({ label: 'Show coordinates', checked: display.showCoordinates, onChange: (v) => ((display.showCoordinates = v), displayChanged()) }),
-        Checkbox({ label: 'Grid lines', checked: display.showGridLines, onChange: (v) => ((display.showGridLines = v), displayChanged()) }),
-        Field({ label: 'Paint colors', value: colorsValue, control: colorsSlider }),
-      ]),
-      el('details', { className: 'chart-settings__crop' }, [
-        el('summary', { text: "Crop a section (for a sheet with many paintings, like Bedrock's)" }),
-        el('div', { className: 'chart-settings__controls' }, [
-          ...cropInputs.map(({ key, input }) => Field({ label: cropLabels[key], control: input })),
-          Button({ label: 'Use whole image', variant: 'ghost', onClick: () => (resetCrop(), analysisChanged()) }),
+      SectionHeader('Chart settings', Button({ label: 'Print chart', onClick: onPrint })),
+      el('div', { className: 'chart-settings__groups' }, [
+        SettingsGroup('Colors', [
+          RangeField({
+            label: 'Paint colors',
+            min: COLORS_MIN,
+            max: COLORS_ALL,
+            value: colors,
+            format: (v) => (v >= COLORS_ALL ? 'All' : String(v)),
+            onInput: (v) => {
+              colors = v;
+              onAnalysisChange(analysis());
+            },
+          }),
+          Text('Fewer colors are easier to mix. Paints are numbered from dark to light.', { tone: 'muted', size: 'sm' }),
         ]),
-        Text(
-          'Width and height of 0 mean the whole image. Minecraft paintings are 16 pixels per block, so a 2×1 painting is 32×16.',
-          { tone: 'muted', size: 'sm' },
-        ),
+        SettingsGroup('Display', [
+          cellSlot,
+          Switch({ label: 'Show numbers', checked: display.showNumbers, onChange: (v) => setDisplay('showNumbers', v) }),
+          Switch({ label: 'Show coordinates', checked: display.showCoordinates, onChange: (v) => setDisplay('showCoordinates', v) }),
+          Switch({ label: 'Grid lines', checked: display.showGridLines, onChange: (v) => setDisplay('showGridLines', v) }),
+        ]),
+        SettingsGroup('Print', [
+          SegmentedControl<PaperSize>({
+            label: 'Paper',
+            name: 'paper',
+            value: print.paper,
+            options: [
+              { value: 'A4', label: 'A4' },
+              { value: 'Letter', label: 'Letter' },
+              { value: 'A3', label: 'A3' },
+            ],
+            onChange: (v) => (print.paper = v),
+          }),
+          SegmentedControl<Orientation>({
+            label: 'Orientation',
+            name: 'orientation',
+            value: print.orientation,
+            options: [
+              { value: 'auto', label: 'Auto' },
+              { value: 'portrait', label: 'Portrait' },
+              { value: 'landscape', label: 'Landscape' },
+            ],
+            onChange: (v) => (print.orientation = v),
+          }),
+          Switch({ label: 'Include title', checked: print.includeTitle, onChange: (v) => (print.includeTitle = v) }),
+          Switch({ label: 'Include color list', checked: print.includePalette, onChange: (v) => (print.includePalette = v) }),
+          Text('The chart prints with the colors and display options above, scaled to fit the page.', { tone: 'muted', size: 'sm' }),
+        ]),
       ]),
     ],
     { label: 'Chart settings' },
@@ -108,13 +128,10 @@ export function ChartSettings({ onDisplayChange, onAnalysisChange, onFile }: Cha
     root,
     display: () => ({ ...display }),
     analysis,
+    print: () => ({ ...print }),
     setCellSize(size) {
       display.cellSize = size;
-      cellSize.value = String(size);
-    },
-    resetCrop,
-    setOriginalColorCount(count) {
-      colorsValue.title = `${count} exact colors in the original`;
+      renderCellSize();
     },
   };
 }

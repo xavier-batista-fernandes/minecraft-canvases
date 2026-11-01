@@ -8,6 +8,8 @@ import './chart-canvas.css';
 export interface ChartCanvasHandle {
   root: HTMLElement;
   render: (chart: Chart | null, options: RenderOptions) => void;
+  /** Width available for the chart, in CSS pixels. */
+  availableWidth: () => number;
 }
 
 /** The numbered grid, drawn on a canvas using the current theme colors. */
@@ -16,15 +18,17 @@ export function ChartCanvas(): ChartCanvasHandle {
     className: 'chart-canvas__canvas',
     attrs: { role: 'img', 'aria-label': 'Paint-by-numbers chart' },
   });
+  const scroll = el('div', { className: 'chart-canvas__scroll' }, [canvas]);
   const root = Panel(
     [
-      SectionHeader('Chart', Text('Click a color in the list to highlight its squares.', { tone: 'muted', size: 'sm', as: 'span' })),
-      el('div', { className: 'chart-canvas__scroll' }, [canvas]),
+      SectionHeader('Chart', Text('Click a color in the palette to highlight its squares.', { tone: 'muted', size: 'sm', as: 'span' })),
+      scroll,
     ],
-    { as: 'div', label: 'Chart' },
+    { label: 'Chart' },
   );
   return {
     root,
+    availableWidth: () => scroll.clientWidth,
     render(chart, options) {
       if (!chart) return;
       const styles = getComputedStyle(document.documentElement);

@@ -1,0 +1,16 @@
+.print-sheet { display: none; }
+
+@media print {
+  .print-sheet { display: block; color: #000; background: #fff; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .print-sheet__chart-page { height: 100vh; display: flex; flex-direction: column; gap: 4mm; overflow: hidden; }
+  .print-sheet__title { font-family: var(--display); font-weight: 400; font-size: 20pt; margin: 0; }
+  .print-sheet__summary { font-family: var(--mono); font-size: 9pt; color: #444; }
+  .print-sheet__canvas { flex: 1 1 auto; min-height: 0; width: 100% !important; height: 100% !important; object-fit: contain; object-position: top center; }
+  .print-sheet__palette { break-before: page; }
+  .print-sheet__palette h2 { font-family: var(--display); font-weight: 400; font-size: 14pt; margin: 0 0 4mm; }
+  .print-sheet__table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 9pt; }
+  .print-sheet__table th, .print-sheet__table td { border-bottom: 1px solid #ccc; padding: 1.5mm 2mm; text-align: left; }
+  .print-sheet__table thead { display: table-header-group; }
+  .print-sheet__table tr { break-inside: avoid; }
+  .print-sheet__table .swatch { width: 10mm; height: 5mm; }
+}

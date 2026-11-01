@@ -22,13 +22,17 @@ export const PIXELS_PER_BLOCK = 16;
 const MIN_CELL_FOR_NUMBERS = 14;
 const DIMMED_ALPHA = 0.18;
 
-/** A comfortable starting cell size for an image of this size. */
-export function suggestedCellSize(width: number, height: number): number {
-  const biggest = Math.max(width, height);
-  if (biggest <= 16) return 40;
-  if (biggest <= 32) return 30;
-  if (biggest <= 64) return 20;
-  return 14;
+export const MIN_CELL_SIZE = 12;
+export const MAX_CELL_SIZE = 96;
+
+/**
+ * The largest cell size that fits a chart `columns` squares wide into `availableWidth` CSS pixels,
+ * leaving room for the coordinate margin, clamped to a usable range.
+ */
+export function fitCellSize(columns: number, availableWidth: number): number {
+  // Total width is margin + columns × size + 1, with the margin at most max(18, 0.8 × size).
+  const size = Math.floor((availableWidth - 19) / (columns + 0.8));
+  return Math.min(MAX_CELL_SIZE, Math.max(MIN_CELL_SIZE, size));
 }
 
 export function renderChart(
@@ -36,6 +40,8 @@ export function renderChart(
   chart: Chart,
   options: RenderOptions,
   theme: RenderTheme,
+  /** Device pixels per CSS pixel. Defaults to the screen's; printing passes a higher value for crisp output. */
+  pixelRatio: number = window.devicePixelRatio || 1,
 ): void {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
@@ -43,7 +49,7 @@ export function renderChart(
   const { cellSize: s, showNumbers, showCoordinates, showGridLines, highlight } = options;
 
   const margin = showCoordinates ? Math.max(18, s * 0.8) : 0;
-  const dpr = window.devicePixelRatio || 1;
+  const dpr = pixelRatio;
   const cssWidth = margin + W * s + 1;
   const cssHeight = margin + H * s + 1;
   canvas.width = Math.round(cssWidth * dpr);

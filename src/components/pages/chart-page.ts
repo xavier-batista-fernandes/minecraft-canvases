@@ -1,16 +1,14 @@
 import { DEFAULT_PAINTING_ID, PAINTINGS, paintingUrl, type Painting } from '../../data/paintings';
 import { resolveCrop } from '../../lib/crop';
 import { paletteToText } from '../../lib/export';
-import { fileToImageData, loadImageData } from '../../lib/image';
+import { loadImageData } from '../../lib/image';
 import { buildChart, type Chart } from '../../lib/quantize';
-import { suggestedCellSize } from '../../lib/render';
+import { fitCellSize } from '../../lib/render';
 import { ChartSummary } from '../molecules';
-import { ChartCanvas, ChartSettings, HowToGuide, PaintingPicker, PalettePanel, SiteHeader } from '../organisms';
+import { ChartCanvas, ChartSettings, PaintingPicker, PalettePanel, PrintSheet, SiteHeader } from '../organisms';
 import { WorkbenchTemplate } from '../templates';
 
 const STORAGE_KEY = 'painting';
-/** Images larger than this are probably a sheet of many paintings; suggest cropping. */
-const LARGE_IMAGE_PIXELS = 256 * 256;
 
 function savedPaintingId(): string | null {
   try {
@@ -43,6 +41,7 @@ export function ChartPage(): HTMLElement {
 
   const summary = ChartSummary();
   const canvas = ChartCanvas();
+  const printSheet = PrintSheet();
   const palette = PalettePanel({
     onToggle: (i) => {
       state.highlight = state.highlight === i ? -1 : i;
@@ -60,17 +59,15 @@ export function ChartPage(): HTMLElement {
   const settings = ChartSettings({
     onDisplayChange: () => draw(),
     onAnalysisChange: () => refresh(),
-    onFile: (file) => void loadFile(file),
+    onPrint: () => window.print(),
   });
   const picker = PaintingPicker({ paintings: PAINTINGS, onSelect: (p) => void selectPainting(p) });
 
   function analyze(): void {
     const { source } = state;
     if (!source) return;
-    const { maxColors, crop } = settings.analysis();
-    const area = resolveCrop(source.width, source.height, crop);
-    state.chart = area ? buildChart(source, area, maxColors) : null;
-    if (state.chart) settings.setOriginalColorCount(state.chart.originalColorCount);
+    const area = resolveCrop(source.width, source.height);
+    state.chart = area ? buildChart(source, area, settings.analysis().maxColors) : null;
     if (!state.chart || state.highlight >= state.chart.palette.length) state.highlight = -1;
   }
 
@@ -85,12 +82,15 @@ export function ChartPage(): HTMLElement {
     draw();
   }
 
-  function setSource(source: ImageData, title: string): void {
-    state.source = source;
-    state.title = title;
-    state.highlight = -1;
-    settings.setCellSize(suggestedCellSize(source.width, source.height));
-    refresh();
+  function preparePrint(): void {
+    if (!state.chart) return;
+    printSheet.prepare({
+      title: state.title,
+      summary: [...summary.root.children].map((c) => c.textContent).join(' · '),
+      chart: state.chart,
+      options: { ...settings.display(), highlight: state.highlight },
+      settings: settings.print(),
+    });
   }
 
   async function selectPainting(painting: Painting): Promise<void> {
@@ -100,38 +100,20 @@ export function ChartPage(): HTMLElement {
     try {
       const source = await loadImageData(paintingUrl(painting));
       if (state.currentId !== painting.id) return; // another painting was picked meanwhile
-      settings.resetCrop();
       palette.notify('');
-      setSource(source, painting.name);
+      state.source = source;
+      state.title = painting.name;
+      state.highlight = -1;
+      settings.setCellSize(fitCellSize(source.width, canvas.availableWidth()));
+      refresh();
     } catch {
       palette.notify(`Could not load ${painting.name}.`);
     }
   }
 
-  async function loadFile(file: File | null | undefined): Promise<void> {
-    if (!file || !file.type.startsWith('image/')) {
-      palette.notify('That file is not an image. Choose a PNG.');
-      return;
-    }
-    try {
-      const source = await fileToImageData(file);
-      state.currentId = null;
-      picker.setSelected(null);
-      settings.resetCrop();
-      palette.notify(
-        source.width * source.height > LARGE_IMAGE_PIXELS ? 'Large image. Use “Crop a section” to pick one painting.' : '',
-      );
-      setSource(source, file.name || 'Pasted image');
-    } catch {
-      palette.notify('Could not read that image. Try a PNG file.');
-    }
-  }
-
-  // Paste an image anywhere on the page.
-  window.addEventListener('paste', (e) => {
-    const item = [...(e.clipboardData?.items ?? [])].find((i) => i.type.startsWith('image/'));
-    if (item) void loadFile(item.getAsFile());
-  });
+  // Build the printed pages from the current settings, whether printing starts from the
+  // button or from the browser (Ctrl/Cmd+P).
+  window.addEventListener('beforeprint', preparePrint);
   // The canvas uses theme colors and a web font, so redraw when either changes.
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
   new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
@@ -150,6 +132,6 @@ export function ChartPage(): HTMLElement {
     summary: summary.root,
     chart: canvas.root,
     palette: palette.root,
-    guide: HowToGuide(),
+    print: printSheet.root,
   });
 }
