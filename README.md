@@ -2,16 +2,16 @@
 
 Turn a Minecraft painting into a paint-by-numbers chart, so you can paint it in real life.
 
-Pick one of the 50 Java Edition paintings (or load your own PNG) and the app shows every pixel as a numbered square, plus a palette with the hex and RGB code of each paint and how many squares need it.
+Pick one of the 50 Java Edition paintings and the app shows every pixel as a numbered square, plus a palette with the hex and RGB code of each paint and how many squares need it.
 
 ## Features
 
 - **Painting picker** with all Java Edition 1.21 paintings, grouped by size in blocks like the [Minecraft Wiki's Painting page](https://minecraft.wiki/w/Painting), with search.
-- **Numbered chart** with spreadsheet-style coordinates (A, B, C… across, 1, 2, 3… down), a heavier line every 16 pixels (one block), and adjustable cell size.
+- **Numbered chart** at full width, with spreadsheet-style coordinates (A, B, C… across, 1, 2, 3… down) and a heavier line every 16 pixels (one block). Cell size starts at whatever fills the screen and can be adjusted.
 - **Color simplification:** reduce a painting to 2–64 paints (or keep every exact color) with a deterministic weighted k-means. Paints are numbered dark → light, which is handy for layering.
 - **Highlight a paint:** click a palette row to dim everything else and see only the squares that need it.
 - **Copy the color list** as tab-separated text for a spreadsheet or notes app.
-- **Your own images:** upload, drag-and-drop or paste a PNG (e.g. from a resource pack). A crop tool picks one painting out of a sheet like Bedrock's `kz.png`.
+- **Print:** prints the chart with your color and display settings, scaled to fit the page. Choose the paper (A4, Letter, A3), orientation (auto picks landscape for wide paintings), and whether to include the title and a color list on a second page. Ctrl/Cmd+P works too.
 - Light and dark themes; remembers the last painting you picked.
 
 ## Getting started
@@ -52,9 +52,9 @@ src/
   main.ts                   Mounts the page
   styles/                   Design tokens (colors, fonts, dark mode) and base element styles
   components/               UI, organized with atomic design (each component has its own .css)
-    atoms/                  Smallest pieces: Button, Checkbox, Slider, Heading, Logo, Text, Swatch, Panel…
-    molecules/              Small groups of atoms: Field, PaintingCard, PaletteRow, FileDrop, ChartSummary…
-    organisms/              Page sections: PaintingPicker, ChartSettings, ChartCanvas, PalettePanel, HowToGuide…
+    atoms/                  Smallest pieces: Button, Switch, Slider, Heading, Logo, Text, Swatch, Panel…
+    molecules/              Small groups of atoms: Field, RangeField, SegmentedControl, SettingsGroup, PaintingCard, PaletteRow…
+    organisms/              Page sections: PaintingPicker, ChartSettings, ChartCanvas, PalettePanel, PrintSheet…
     templates/              Layout only: WorkbenchTemplate places the sections, no behavior
     pages/                  ChartPage owns the app state and wires the organisms together
   data/
