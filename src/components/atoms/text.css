@@ -1,0 +1,4 @@
+.text--muted { color: var(--muted); }
+.text--sm { font-size: 13px; }
+.text--xs { font-size: 12px; }
+.text--strong { font-weight: 600; }

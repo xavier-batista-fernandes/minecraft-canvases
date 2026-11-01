@@ -1,0 +1,1 @@
+.panel { display: grid; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; min-width: 0; }

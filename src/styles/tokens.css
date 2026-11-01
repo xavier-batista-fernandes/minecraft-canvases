@@ -1,0 +1,35 @@
+/* Design tokens. Light by default, dark via the OS setting or data-theme="dark". */
+:root {
+  --bg: #f3f1ec;
+  --panel: #fffdf8;
+  --fg: #23201b;
+  --muted: #6b655b;
+  --line: #d9d3c7;
+  --accent: #3f7a3a; /* grass green */
+  --accent-fg: #ffffff;
+  --display: 'Silkscreen', 'Courier New', monospace;
+  --body: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #1b1a17;
+    --panel: #24221e;
+    --fg: #ece7dc;
+    --muted: #a59d8f;
+    --line: #3a3630;
+    --accent: #7cbc6f;
+    --accent-fg: #142012;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #1b1a17;
+  --panel: #24221e;
+  --fg: #ece7dc;
+  --muted: #a59d8f;
+  --line: #3a3630;
+  --accent: #7cbc6f;
+  --accent-fg: #142012;
+  color-scheme: dark;
+}

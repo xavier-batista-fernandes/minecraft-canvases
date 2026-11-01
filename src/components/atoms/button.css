@@ -1,0 +1,2 @@
+.btn { font: inherit; font-weight: 600; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg); padding: 8px 14px; border-radius: 4px; cursor: pointer; }
+.btn--ghost { background: transparent; color: var(--fg); border-color: var(--line); }
