@@ -1,0 +1,4 @@
+.chart-settings__controls { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: end; }
+.chart-settings__crop summary { cursor: pointer; }
+.chart-settings__crop .chart-settings__controls { margin-top: 10px; }
+.chart-settings__crop p { margin-top: 8px; }

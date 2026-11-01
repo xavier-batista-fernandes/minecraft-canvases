@@ -1,0 +1,5 @@
+.painting-card { display: grid; justify-items: center; gap: 4px; width: 92px; padding: 6px 4px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--fg); font: inherit; font-size: 11px; line-height: 1.2; cursor: pointer; text-align: center; }
+.painting-card:hover { border-color: var(--muted); }
+.painting-card[aria-pressed='true'] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.painting-card__image { height: 48px; display: grid; place-items: center; }
+.painting-card__image img { max-height: 48px; max-width: 80px; }
