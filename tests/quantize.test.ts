@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildChart, type PixelSource } from '../src/lib/quantize';
+import { buildChart, countColors, type PixelSource } from '../src/lib/quantize';
 import { paletteToText } from '../src/lib/export';
 
 type Px = [number, number, number, number?];
@@ -67,6 +67,13 @@ describe('buildChart', () => {
     expect(chart.palette[0]).toMatchObject({ r: 200, g: 0, b: 0, count: 2 });
   });
 
+  it('can reduce to a single paint', () => {
+    const src = image(3, 1, [WHITE, BLACK, RED]);
+    const chart = buildChart(src, full(src), 1);
+    expect(chart.palette).toHaveLength(1);
+    expect([...chart.cells]).toEqual([0, 0, 0]);
+  });
+
   it('keeps every color when the limit is Infinity', () => {
     const pixels: Px[] = Array.from({ length: 100 }, (_, i) => [i, 255 - i, i * 2]);
     const src = image(10, 10, pixels);
@@ -80,5 +87,19 @@ describe('paletteToText', () => {
     expect(paletteToText('Test', buildChart(src, full(src), 24))).toBe(
       'Test (2x1)\n1\t#000000\tRGB(0, 0, 0)\t1 squares\n2\t#FFFFFF\tRGB(255, 255, 255)\t1 squares',
     );
+  });
+});
+
+describe('countColors', () => {
+  it('counts distinct opaque colors in the crop', () => {
+    const src = image(4, 1, [WHITE, BLACK, WHITE, CLEAR]);
+    expect(countColors(src, full(src))).toBe(2);
+    expect(countColors(src, { x: 2, y: 0, width: 2, height: 1 })).toBe(1);
+  });
+
+  it('matches the original color count of a chart', () => {
+    const pixels: Px[] = Array.from({ length: 64 }, (_, i) => [(i * 37) % 256, (i * 91) % 256, 7]);
+    const src = image(8, 8, pixels);
+    expect(countColors(src, full(src))).toBe(buildChart(src, full(src), 4).originalColorCount);
   });
 });

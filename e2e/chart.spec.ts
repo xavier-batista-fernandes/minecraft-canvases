@@ -64,14 +64,35 @@ test('selecting a painting updates the chart and is remembered after reload', as
   await expect(paintingCard(page, 'Wanderer')).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('the paint colors slider simplifies the palette', async ({ page }) => {
+test('the paint colors slider runs from 1 to the painting\'s own color count', async ({ page }) => {
   const slider = page.getByRole('slider', { name: /Paint colors/ });
+  const value = page.locator('.range-field', { hasText: 'Paint colors' }).locator('output');
+  const total = Number((await summary(page).innerText()).match(/simplified from (\d+)/)![1]);
+  await expect(slider).toHaveAttribute('min', '1');
+  await expect(slider).toHaveAttribute('max', String(total));
+
+  await slider.fill('1');
+  await expect(paletteRows(page)).toHaveCount(1);
+  await expect(value).toHaveText('1');
+
   await slider.fill('4');
   await expect(paletteRows(page)).toHaveCount(4);
-  await expect(summary(page)).toContainText(/4 paint colors \(simplified from \d+\)/);
+  await expect(summary(page)).toContainText(`4 paint colors (simplified from ${total})`);
 
-  await slider.fill('65');
-  await expect(page.locator('.range-field', { hasText: 'Paint colors' }).locator('output')).toHaveText('All');
+  await slider.fill(String(total));
+  await expect(value).toHaveText(`${total} (all)`);
+  await expect(paletteRows(page)).toHaveCount(total);
+  await expect(summary(page)).not.toContainText('simplified');
+});
+
+test('the color range follows the selected painting', async ({ page }) => {
+  const slider = page.getByRole('slider', { name: /Paint colors/ });
+  await slider.fill(await slider.getAttribute('max') as string); // all colors
+  await paintingCard(page, 'Wanderer').click();
+  await expect(summary(page)).toContainText('Wanderer');
+  const max = await slider.getAttribute('max');
+  expect(Number(max)).toBeGreaterThan(24);
+  await expect(slider).toHaveValue(max!); // "all" carries over
   await expect(summary(page)).not.toContainText('simplified');
 });
 

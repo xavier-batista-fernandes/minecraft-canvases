@@ -103,9 +103,22 @@ export function reduceColors(colors: WeightedColor[], k: number): { assign: numb
   };
 }
 
+/** Number of distinct opaque colors in the cropped area. */
+export function countColors(source: PixelSource, crop: CropRect): number {
+  const seen = new Set<number>();
+  const { data } = source;
+  for (let y = crop.y; y < crop.y + crop.height; y++) {
+    for (let x = crop.x; x < crop.x + crop.width; x++) {
+      const i = (y * source.width + x) * 4;
+      if (data[i + 3]! >= ALPHA_THRESHOLD) seen.add((data[i]! << 16) | (data[i + 1]! << 8) | data[i + 2]!);
+    }
+  }
+  return seen.size;
+}
+
 /**
  * Build a paint-by-numbers chart for the cropped area of `source`, using at most
- * `maxColors` paints (pass Infinity to keep every exact color).
+ * `maxColors` paints (the color count, or more, keeps every exact color).
  */
 export function buildChart(source: PixelSource, crop: CropRect, maxColors: number): Chart {
   const { width, height } = crop;

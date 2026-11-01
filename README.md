@@ -8,7 +8,7 @@ Pick one of the 50 Java Edition paintings and the app shows every pixel as a num
 
 - **Painting picker** with all Java Edition 1.21 paintings, grouped by size in blocks like the [Minecraft Wiki's Painting page](https://minecraft.wiki/w/Painting), with search.
 - **Numbered chart** at full width, with spreadsheet-style coordinates (A, B, C… across, 1, 2, 3… down) and a heavier line every 16 pixels (one block). Cell size starts at whatever fills the screen and can be adjusted.
-- **Color simplification:** reduce a painting to 2–64 paints (or keep every exact color) with a deterministic weighted k-means. Paints are numbered dark → light, which is handy for layering.
+- **Color simplification:** reduce a painting to any number of paints, from 1 up to all of its exact colors, with a deterministic weighted k-means. Paints are numbered dark → light, which is handy for layering.
 - **Highlight a paint:** click a palette row to dim everything else and see only the squares that need it.
 - **Copy the color list** as tab-separated text for a spreadsheet or notes app.
 - **Print:** prints the chart with your color and display settings, scaled to fit the page. Choose the paper (A4, Letter, A3), orientation (auto picks landscape for wide paintings), and whether to include the title and a color list on a second page. Ctrl/Cmd+P works too.
