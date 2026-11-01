@@ -10,6 +10,8 @@ export interface WorkbenchSlots {
   palette: Node;
   /** Shown only when printing; everything else is hidden then. */
   print: Node;
+  /** Dialogs, opened on demand. */
+  overlays: Node[];
 }
 
 /**
@@ -21,5 +23,6 @@ export function WorkbenchTemplate(slots: WorkbenchSlots): HTMLElement {
     slots.header,
     el('main', { className: 'workbench__body' }, [slots.picker, slots.settings, slots.summary, slots.chart, slots.palette]),
     el('div', { className: 'workbench__print' }, [slots.print]),
+    ...slots.overlays,
   ]);
 }

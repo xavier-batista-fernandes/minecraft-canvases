@@ -1,0 +1,9 @@
+.modal { width: min(1040px, calc(100% - 32px)); max-height: calc(100vh - 32px); padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--fg); box-shadow: 0 20px 60px rgba(0, 0, 0, .3); }
+.modal::backdrop { background: rgba(20, 18, 15, .55); }
+.modal__frame { display: grid; grid-template-rows: auto 1fr auto; max-height: calc(100vh - 34px); }
+.modal__header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.modal__close { font: inherit; font-size: 22px; line-height: 1; width: 32px; height: 32px; border: 0; border-radius: 4px; background: none; color: var(--muted); cursor: pointer; }
+.modal__close:hover { background: var(--bg); color: var(--fg); }
+.modal__body { overflow: auto; padding: 18px; min-height: 0; }
+.modal__footer { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 18px; border-top: 1px solid var(--line); }
+@media print { .modal { display: none !important; } }

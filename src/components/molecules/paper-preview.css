@@ -1,0 +1,4 @@
+.paper-preview { display: grid; gap: 6px; justify-items: center; margin: 0; }
+.paper-preview__sheet { position: relative; width: 100%; background: #fff; color: #000; box-shadow: 0 1px 3px rgba(0, 0, 0, .25), 0 6px 18px rgba(0, 0, 0, .12); border-radius: 2px; overflow: hidden; }
+.paper-preview__content { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 3%; overflow: hidden; }
+.paper-preview__label { font-family: var(--mono); font-size: 11px; color: var(--muted); }
