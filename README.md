@@ -11,7 +11,7 @@ Pick one of the 50 Java Edition paintings and the app shows every pixel as a num
 - **Color simplification:** reduce a painting to any number of paints, from 1 up to all of its exact colors, with a deterministic weighted k-means. Paints are numbered dark → light, which is handy for layering.
 - **Highlight a paint:** click a palette row to dim everything else and see only the squares that need it.
 - **Copy the color list** as tab-separated text for a spreadsheet or notes app.
-- **Print:** prints the chart with your color and display settings, scaled to fit the page. Choose the paper (A4, Letter, A3), orientation (auto picks landscape for wide paintings), and whether to include the title and a color list on a second page. Ctrl/Cmd+P works too.
+- **Print:** "Print chart" opens a print dialog with a live preview of every page. Print with colored or blank squares (a classic paint-by-numbers sheet), with or without numbers, coordinates and grid lines, on A4, Letter or A3, in portrait, landscape or auto (follows the painting's shape), with an optional title and a color list page. Ctrl/Cmd+P reuses the last choices.
 - Light and dark themes; remembers the last painting you picked.
 
 ## Getting started
@@ -34,7 +34,14 @@ npm run dev        # start the dev server at http://localhost:5173
 | `npm run typecheck`   | Type-check the app, unit tests and e2e tests              |
 | `npm run check`       | Type-check and unit test                                  |
 
-The first time you run the e2e tests, install a browser with `npx playwright install chromium`.
+### Running the e2e tests locally
+
+```sh
+npm install
+npm run test:e2e
+```
+
+`npm run test:e2e` first runs `playwright install chromium` (a one-time download of Playwright's own Chromium, about 150 MB; later runs skip it), then builds the app and serves it on port 4317 for the tests. If that port is taken, stop whatever uses it. On Linux, missing system libraries can be installed with `npx playwright install-deps chromium`. A failed run leaves a report you can open with `npx playwright show-report`.
 
 ## Deployment
 
@@ -53,8 +60,8 @@ src/
   styles/                   Design tokens (colors, fonts, dark mode) and base element styles
   components/               UI, organized with atomic design (each component has its own .css)
     atoms/                  Smallest pieces: Button, Switch, Slider, Heading, Logo, Text, Swatch, Panel…
-    molecules/              Small groups of atoms: Field, RangeField, SegmentedControl, SettingsGroup, PaintingCard, PaletteRow…
-    organisms/              Page sections: PaintingPicker, ChartSettings, ChartCanvas, PalettePanel, PrintSheet…
+    molecules/              Small groups of atoms: Field, RangeField, SegmentedControl, SettingsGroup, Modal, PaperPreview, PaintingCard, PaletteRow…
+    organisms/              Page sections: PaintingPicker, ChartSettings, ChartCanvas, PalettePanel, PrintDialog, PrintSheet…
     templates/              Layout only: WorkbenchTemplate places the sections, no behavior
     pages/                  ChartPage owns the app state and wires the organisms together
   data/
@@ -63,6 +70,7 @@ src/
   lib/                      Framework-free logic, unit tested
     quantize.ts             Pixels → chart: unique colors, k-means reduction, numbering
     render.ts               Draws a chart onto a <canvas>
+    print.ts                Print options: paper sizes, orientation, @page rule, how the printed chart is drawn
     crop.ts, color.ts, export.ts, image.ts
 tests/                      Vitest unit tests, including a manifest/PNG consistency check
 e2e/                        Playwright tests, run on desktop and mobile Chrome
