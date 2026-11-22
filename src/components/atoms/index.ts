@@ -1,6 +1,7 @@
 export * from './button';
 export * from './heading';
 export * from './logo';
+export * from './number-input';
 export * from './panel';
 export * from './pixel-image';
 export * from './search-input';

@@ -1,7 +1,7 @@
 import { MAX_CELL_SIZE, MIN_CELL_SIZE, type RenderOptions } from '../../lib/render';
 import { Button, Panel, Switch, Text } from '../atoms';
 import { el } from '../dom';
-import { RangeField, SectionHeader, SettingsGroup } from '../molecules';
+import { NumberField, RangeField, SectionHeader, SettingsGroup } from '../molecules';
 import './chart-settings.css';
 
 export type DisplaySettings = Omit<RenderOptions, 'highlight'>;
@@ -25,7 +25,7 @@ export interface ChartSettingsHandle {
   /** Set the cell size without firing a change (used when a new painting loads). */
   setCellSize: (size: number) => void;
   /**
-   * Let the paint color slider run from 1 to `count` (the painting's exact colors), keeping the
+   * Let the paint color input run from 1 to `count` (the painting's exact colors), keeping the
    * current choice when it still fits. Does not fire a change.
    */
   setColorCount: (count: number) => void;
@@ -36,7 +36,7 @@ const COLORS_DEFAULT = 24;
 export function ChartSettings({ onDisplayChange, onAnalysisChange, onPrint }: ChartSettingsProps): ChartSettingsHandle {
   const display: DisplaySettings = { cellSize: 30, showNumbers: true, showCoordinates: true, showGridLines: true };
   let colors = COLORS_DEFAULT;
-  /** Colors in the current painting; the slider's top end. */
+  /** Colors in the current painting; the input's upper bound. */
   let colorCount = COLORS_DEFAULT;
   let hasColorCount = false;
 
@@ -65,13 +65,13 @@ export function ChartSettings({ onDisplayChange, onAnalysisChange, onPrint }: Ch
   const colorsSlot = el('div');
   const renderColors = () =>
     colorsSlot.replaceChildren(
-      RangeField({
+      NumberField({
         label: 'Paint colors',
         min: 1,
         max: colorCount,
         value: colors,
-        format: (v) => (v === colorCount ? `${v} (all)` : String(v)),
-        onInput: (v) => {
+        hint: (v) => (v === colorCount ? `of ${colorCount} (all)` : `of ${colorCount}`),
+        onChange: (v) => {
           colors = v;
           onAnalysisChange(analysis());
         },

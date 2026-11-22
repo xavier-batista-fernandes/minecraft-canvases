@@ -1,0 +1,2 @@
+.number-input { font: inherit; font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; padding: 4px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--fg); width: 6em; max-width: 100%; }
+.number-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }

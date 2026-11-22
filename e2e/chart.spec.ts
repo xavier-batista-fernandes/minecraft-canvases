@@ -64,35 +64,56 @@ test('selecting a painting updates the chart and is remembered after reload', as
   await expect(paintingCard(page, 'Wanderer')).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('the paint colors slider runs from 1 to the painting\'s own color count', async ({ page }) => {
-  const slider = page.getByRole('slider', { name: /Paint colors/ });
-  const value = page.locator('.range-field', { hasText: 'Paint colors' }).locator('output');
+test('the paint colors input runs from 1 to the painting\'s own color count', async ({ page }) => {
+  const input = page.getByRole('spinbutton', { name: 'Paint colors' });
+  const hint = page.locator('.number-field', { hasText: 'Paint colors' }).locator('.number-field__hint');
   const total = Number((await summary(page).innerText()).match(/simplified from (\d+)/)![1]);
-  await expect(slider).toHaveAttribute('min', '1');
-  await expect(slider).toHaveAttribute('max', String(total));
+  await expect(input).toHaveAttribute('min', '1');
+  await expect(input).toHaveAttribute('max', String(total));
 
-  await slider.fill('1');
+  await input.fill('1');
   await expect(paletteRows(page)).toHaveCount(1);
-  await expect(value).toHaveText('1');
+  await expect(hint).toHaveText(`of ${total}`);
 
-  await slider.fill('4');
+  await input.fill('4');
   await expect(paletteRows(page)).toHaveCount(4);
   await expect(summary(page)).toContainText(`4 paint colors (simplified from ${total})`);
 
-  await slider.fill(String(total));
-  await expect(value).toHaveText(`${total} (all)`);
+  await input.fill(String(total));
+  await expect(hint).toHaveText(`of ${total} (all)`);
   await expect(paletteRows(page)).toHaveCount(total);
   await expect(summary(page)).not.toContainText('simplified');
 });
 
+test('the paint colors input clamps invalid values', async ({ page }) => {
+  const input = page.getByRole('spinbutton', { name: 'Paint colors' });
+  const total = Number(await input.getAttribute('max'));
+
+  await input.fill('0');
+  await input.press('Enter');
+  await expect(input).toHaveValue('1');
+  await expect(paletteRows(page)).toHaveCount(1);
+
+  await input.fill(String(total + 50));
+  await input.blur();
+  await expect(input).toHaveValue(String(total));
+  await expect(paletteRows(page)).toHaveCount(total);
+
+  await input.fill('3');
+  await input.fill('');
+  await input.blur();
+  await expect(input).toHaveValue('3'); // an empty box goes back to the last value
+  await expect(paletteRows(page)).toHaveCount(3);
+});
+
 test('the color range follows the selected painting', async ({ page }) => {
-  const slider = page.getByRole('slider', { name: /Paint colors/ });
-  await slider.fill(await slider.getAttribute('max') as string); // all colors
+  const input = page.getByRole('spinbutton', { name: 'Paint colors' });
+  await input.fill(await input.getAttribute('max') as string); // all colors
   await paintingCard(page, 'Wanderer').click();
   await expect(summary(page)).toContainText('Wanderer');
-  const max = await slider.getAttribute('max');
+  const max = await input.getAttribute('max');
   expect(Number(max)).toBeGreaterThan(24);
-  await expect(slider).toHaveValue(max!); // "all" carries over
+  await expect(input).toHaveValue(max!); // "all" carries over
   await expect(summary(page)).not.toContainText('simplified');
 });
 
