@@ -1,6 +1,7 @@
 export * from './chart-summary';
 export * from './field';
 export * from './modal';
+export * from './number-field';
 export * from './painting-card';
 export * from './palette-row';
 export * from './paper-preview';
