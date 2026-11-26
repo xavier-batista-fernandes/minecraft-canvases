@@ -10,6 +10,7 @@ Pick one of the 50 Java Edition paintings and the app shows every pixel as a num
 - **Numbered chart** at full width, with spreadsheet-style coordinates (A, B, C… across, 1, 2, 3… down) and a heavier line every 16 pixels (one block). Cell size starts at whatever fills the screen and can be adjusted.
 - **Color simplification:** reduce a painting to any number of paints, from 1 up to all of its exact colors, with a deterministic weighted k-means. Paints are numbered dark → light, which is handy for layering.
 - **Highlight a paint:** click a palette row to dim everything else and see only the squares that need it.
+- **Full-screen paint:** click a square on the chart, or the ⛶ button next to a paint, to fill the screen with that color (with its number, hex and RGB code) so you can hold your mixed paint up against it. The arrow keys step through the paints; Escape or a click on the color closes it.
 - **Copy the color list** as tab-separated text for a spreadsheet or notes app.
 - **Print:** "Print chart" opens a print dialog with a live preview of every page. Print with colored or blank squares (a classic paint-by-numbers sheet), with or without numbers, coordinates and grid lines, on A4, Letter or A3, in portrait, landscape or auto (follows the painting's shape), with an optional title and a color list page. Ctrl/Cmd+P reuses the last choices.
 - Light and dark themes; remembers the last painting you picked.
@@ -61,7 +62,7 @@ src/
   components/               UI, organized with atomic design (each component has its own .css)
     atoms/                  Smallest pieces: Button, Switch, Slider, NumberInput, Heading, Logo, Text, Swatch, Panel…
     molecules/              Small groups of atoms: Field, RangeField, SegmentedControl, SettingsGroup, Modal, PaperPreview, PaintingCard, PaletteRow…
-    organisms/              Page sections: PaintingPicker, ChartSettings, ChartCanvas, PalettePanel, PrintDialog, PrintSheet…
+    organisms/              Page sections: PaintingPicker, ChartSettings, ChartCanvas, PalettePanel, PaintSpotlight, PrintDialog, PrintSheet…
     templates/              Layout only: WorkbenchTemplate places the sections, no behavior
     pages/                  ChartPage owns the app state and wires the organisms together
   data/

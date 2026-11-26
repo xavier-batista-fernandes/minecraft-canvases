@@ -6,7 +6,7 @@ import { buildChart, countColors, type Chart } from '../../lib/quantize';
 import { fitCellSize } from '../../lib/render';
 import { ChartSummary } from '../molecules';
 import type { PrintOptions } from '../../lib/print';
-import { ChartCanvas, ChartSettings, PaintingPicker, PalettePanel, PrintDialog, PrintSheet, SiteHeader } from '../organisms';
+import { ChartCanvas, ChartSettings, PaintSpotlight, PaintingPicker, PalettePanel, PrintDialog, PrintSheet, SiteHeader } from '../organisms';
 import { WorkbenchTemplate } from '../templates';
 
 const STORAGE_KEY = 'painting';
@@ -41,7 +41,11 @@ export function ChartPage(): HTMLElement {
   } = { source: null, title: '', currentId: null, chart: null, highlight: -1 };
 
   const summary = ChartSummary();
-  const canvas = ChartCanvas();
+  const spotlight = PaintSpotlight();
+  const showPaint = (i: number) => {
+    if (state.chart) spotlight.open(state.chart.palette, i);
+  };
+  const canvas = ChartCanvas({ onCellClick: showPaint });
   const printSheet = PrintSheet();
   const printDialog = PrintDialog({
     onPrint: (options) => {
@@ -55,6 +59,7 @@ export function ChartPage(): HTMLElement {
       palette.update(state.chart, state.highlight);
       draw();
     },
+    onSpotlight: showPaint,
     onCopy: () => {
       if (!state.chart) return;
       navigator.clipboard
@@ -141,6 +146,6 @@ export function ChartPage(): HTMLElement {
     chart: canvas.root,
     palette: palette.root,
     print: printSheet.root,
-    overlays: [printDialog.root],
+    overlays: [printDialog.root, spotlight.root],
   });
 }
