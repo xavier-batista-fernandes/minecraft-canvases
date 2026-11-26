@@ -72,6 +72,7 @@ src/
     quantize.ts             Pixels → chart: unique colors, k-means reduction, numbering
     render.ts               Draws a chart onto a <canvas>
     print.ts                Print options: paper sizes, orientation, @page rule, how the printed chart is drawn
+    png.ts                  Decodes painting PNGs to exact pixels (no canvas, so browser privacy noise cannot change colors)
     crop.ts, color.ts, export.ts, image.ts
 tests/                      Vitest unit tests, including a manifest/PNG consistency check
 e2e/                        Playwright tests, run on desktop and mobile Chrome

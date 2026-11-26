@@ -1,17 +1,18 @@
-/** Decode an image URL into raw pixels. */
-export function loadImageData(url: string): Promise<ImageData> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return reject(new Error('Canvas is not supported in this browser.'));
-      ctx.drawImage(img, 0, 0);
-      resolve(ctx.getImageData(0, 0, canvas.width, canvas.height));
-    };
-    img.onerror = () => reject(new Error(`Could not read image: ${url}`));
-    img.src = url;
-  });
+import { decodePng, type Inflate } from './png';
+import type { PixelSource } from './quantize';
+
+/** zlib inflate with the browser's built-in DecompressionStream. */
+const inflate: Inflate = async (data) => {
+  const stream = new Blob([data as BlobPart]).stream().pipeThrough(new DecompressionStream('deflate'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+};
+
+/**
+ * Fetch a PNG and decode its exact pixels. This deliberately avoids drawing on a canvas: some
+ * browsers add privacy noise to canvas reads, which would change the colors on every visit.
+ */
+export async function loadPixels(url: string): Promise<PixelSource> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Could not read image: ${url}`);
+  return decodePng(new Uint8Array(await response.arrayBuffer()), inflate);
 }

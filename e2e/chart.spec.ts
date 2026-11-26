@@ -204,3 +204,21 @@ test('copy list puts the palette on the clipboard', async ({ page, context, brow
   expect(text.split('\n')).toHaveLength(25);
   expect(text).toMatch(/^1\t#[0-9A-F]{6}\tRGB\(\d+, \d+, \d+\)\t\d+ squares$/m);
 });
+
+test('paint numbers stay the same even when the browser adds noise to canvas reads', async ({ page }) => {
+  // Mimic anti-fingerprinting protection (Safari, Brave, Firefox): every canvas read is slightly off.
+  await page.addInitScript(() => {
+    const read = CanvasRenderingContext2D.prototype.getImageData;
+    CanvasRenderingContext2D.prototype.getImageData = function (...args: Parameters<typeof read>) {
+      const image = read.apply(this, args);
+      for (let i = 0; i < image.data.length; i += 4) image.data[i] = image.data[i]! ^ (Math.random() < 0.5 ? 1 : 0);
+      return image;
+    };
+  });
+  await page.reload();
+  await paintingCard(page, 'Paradisträd').click();
+  await expect(summary(page)).toContainText('simplified from 210');
+  await page.getByRole('spinbutton', { name: 'Paint colors' }).fill('25');
+  await expect(paletteRows(page)).toHaveCount(25);
+  await expect(paletteRows(page).nth(20)).toContainText('#B8CCBD');
+});
