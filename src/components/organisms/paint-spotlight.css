@@ -1,0 +1,17 @@
+/* Covers the whole window in one paint color. --paint is set per paint; text flips for contrast. */
+.paint-spotlight { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: var(--paint, #808080); color: #fff; cursor: zoom-out; }
+.paint-spotlight[open] { display: grid; grid-template-rows: auto 1fr; }
+.paint-spotlight[data-contrast='dark'] { color: #111; }
+.paint-spotlight::backdrop { background: var(--paint, #808080); }
+.paint-spotlight__bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: max(12px, env(safe-area-inset-top, 0px)) 16px 12px; cursor: default; }
+.paint-spotlight__group { display: flex; align-items: center; gap: 8px; }
+.paint-spotlight__position { font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums; min-width: 9ch; text-align: center; }
+.paint-spotlight__button { font: inherit; font-size: 22px; line-height: 1; width: 44px; height: 44px; border: 1px solid currentColor; border-radius: 6px; background: transparent; color: inherit; cursor: pointer; opacity: .8; }
+.paint-spotlight__button:hover:not(:disabled) { opacity: 1; background: color-mix(in srgb, currentColor 12%, transparent); }
+.paint-spotlight__button:disabled { opacity: .3; cursor: default; }
+.paint-spotlight__button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.paint-spotlight__info { align-self: end; display: grid; justify-items: start; gap: 2px; padding: 24px max(24px, env(safe-area-inset-left, 0px)) max(32px, env(safe-area-inset-bottom, 0px)); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.paint-spotlight__number { font-family: var(--display); font-size: clamp(48px, 12vw, 120px); line-height: 1; }
+.paint-spotlight__hex { font-size: clamp(24px, 5vw, 44px); font-weight: 600; }
+.paint-spotlight__detail { font-size: 15px; opacity: .85; }
+@media print { .paint-spotlight { display: none !important; } }

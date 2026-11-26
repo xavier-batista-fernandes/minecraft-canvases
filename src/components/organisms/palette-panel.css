@@ -1,1 +1,5 @@
 .palette-panel__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 2px 12px; }
+.palette-panel__item { display: flex; align-items: center; gap: 2px; }
+.palette-panel__item .palette-row { flex: 1 1 auto; min-width: 0; }
+.palette-panel__spotlight { flex: none; font: inherit; font-size: 16px; line-height: 1; width: 30px; height: 30px; border: 1px solid transparent; border-radius: 4px; background: none; color: var(--muted); cursor: pointer; }
+.palette-panel__spotlight:hover { border-color: var(--line); color: var(--fg); }

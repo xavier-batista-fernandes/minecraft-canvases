@@ -118,11 +118,57 @@ test('the color range follows the selected painting', async ({ page }) => {
 });
 
 test('clicking a paint highlights it, clicking again clears it', async ({ page }) => {
-  const row = paletteRows(page).first().getByRole('button');
+  const row = paletteRows(page).first().getByRole('button').first();
   await row.click();
   await expect(row).toHaveAttribute('aria-pressed', 'true');
   await row.click();
   await expect(row).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('a palette color opens full screen and steps through the paints', async ({ page }) => {
+  const first = paletteRows(page).first();
+  const hex = (await first.innerText()).match(/#[0-9A-F]{6}/)![0];
+  await first.getByRole('button', { name: 'Show paint 1 full screen' }).click();
+
+  const spotlight = page.getByRole('dialog', { name: `Paint 1, ${hex}` });
+  await expect(spotlight).toBeVisible();
+  await expect(spotlight).toContainText('Paint 1 of 24');
+  await expect(spotlight).toContainText(hex);
+  const box = (await spotlight.boundingBox())!;
+  const viewport = page.viewportSize()!;
+  expect(box.width).toBe(viewport.width);
+  expect(box.height).toBe(viewport.height);
+  // The background is the paint itself.
+  const background = await spotlight.evaluate((d) => getComputedStyle(d).backgroundColor);
+  const [r, g, b] = background.match(/\d+/g)!.map(Number);
+  expect('#' + [r, g, b].map((v) => v!.toString(16).padStart(2, '0')).join('').toUpperCase()).toBe(hex);
+
+  await page.keyboard.press('ArrowRight');
+  await expect(page.getByRole('dialog')).toContainText('Paint 2 of 24');
+  await page.getByRole('button', { name: 'Previous paint' }).click();
+  await page.getByRole('button', { name: 'Previous paint' }).click();
+  await expect(page.getByRole('dialog')).toContainText('Paint 24 of 24'); // wraps around
+
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toBeHidden();
+  // Highlighting is untouched.
+  await expect(first.getByRole('button').first()).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('clicking a square shows its paint full screen; clicking the color closes it', async ({ page }) => {
+  await page.getByRole('region', { name: 'Chart settings' }).getByLabel('Show coordinates').uncheck();
+  const canvas = page.getByRole('img', { name: 'Paint-by-numbers chart' });
+  await canvas.click({ position: { x: 5, y: 5 } }); // top-left square
+  const spotlight = page.getByRole('dialog', { name: /^Paint \d+, #[0-9A-F]{6}$/ });
+  await expect(spotlight).toBeVisible();
+  const number = (await spotlight.getAttribute('aria-label'))!.match(/Paint (\d+)/)![1];
+  await expect(spotlight).toContainText(`Paint ${number} of 24`);
+
+  await page.mouse.click(page.viewportSize()!.width / 2, page.viewportSize()!.height / 2);
+  await expect(spotlight).toBeHidden();
+  await page.getByRole('button', { name: `Show paint ${number} full screen` }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
+  await expect(page.getByRole('dialog')).toBeHidden();
 });
 
 test('the chart is drawn in the palette colors', async ({ page }) => {

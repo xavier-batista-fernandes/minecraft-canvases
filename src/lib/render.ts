@@ -37,6 +37,28 @@ export function fitCellSize(columns: number, availableWidth: number): number {
   return Math.min(MAX_CELL_SIZE, Math.max(MIN_CELL_SIZE, size));
 }
 
+/** Width of the coordinate margin around the squares, in CSS pixels (0 without coordinates). */
+export function chartMargin(cellSize: number, showCoordinates: boolean): number {
+  return showCoordinates ? Math.max(18, cellSize * 0.8) : 0;
+}
+
+/**
+ * The palette index of the square under a point on a rendered chart, given in CSS pixels from the
+ * canvas's top-left corner. Returns -1 for the margin, outside the chart, or a transparent pixel.
+ */
+export function cellAt(
+  chart: Chart,
+  options: Pick<RenderOptions, 'cellSize' | 'showCoordinates'>,
+  x: number,
+  y: number,
+): number {
+  const margin = chartMargin(options.cellSize, options.showCoordinates);
+  const col = Math.floor((x - margin) / options.cellSize);
+  const row = Math.floor((y - margin) / options.cellSize);
+  if (col < 0 || row < 0 || col >= chart.width || row >= chart.height) return -1;
+  return chart.cells[row * chart.width + col]!;
+}
+
 export function renderChart(
   canvas: HTMLCanvasElement,
   chart: Chart,
@@ -50,7 +72,7 @@ export function renderChart(
   const { width: W, height: H, cells, palette } = chart;
   const { cellSize: s, showNumbers, showCoordinates, showGridLines, highlight, showColors = true } = options;
 
-  const margin = showCoordinates ? Math.max(18, s * 0.8) : 0;
+  const margin = chartMargin(s, showCoordinates);
   const dpr = pixelRatio;
   const cssWidth = margin + W * s + 1;
   const cssHeight = margin + H * s + 1;

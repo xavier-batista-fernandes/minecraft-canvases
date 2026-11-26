@@ -6,6 +6,8 @@ import './palette-panel.css';
 
 export interface PalettePanelProps {
   onToggle: (index: number) => void;
+  /** Show a paint filling the screen. */
+  onSpotlight: (index: number) => void;
   onCopy: () => void;
 }
 
@@ -16,8 +18,18 @@ export interface PalettePanelHandle {
   notify: (message: string) => void;
 }
 
+function spotlightButton(number: number, onClick: () => void): HTMLButtonElement {
+  const button = el('button', {
+    className: 'palette-panel__spotlight',
+    text: '⛶',
+    attrs: { type: 'button', 'aria-label': `Show paint ${number} full screen`, title: 'Show full screen' },
+  });
+  button.addEventListener('click', onClick);
+  return button;
+}
+
 /** The list of paints with their codes and counts. */
-export function PalettePanel({ onToggle, onCopy }: PalettePanelProps): PalettePanelHandle {
+export function PalettePanel({ onToggle, onSpotlight, onCopy }: PalettePanelProps): PalettePanelHandle {
   const list = el('div', { className: 'palette-panel__list', attrs: { role: 'list', 'aria-label': 'Paint colors' } });
   const status = Status();
   const root = Panel(
@@ -29,8 +41,9 @@ export function PalettePanel({ onToggle, onCopy }: PalettePanelProps): PalettePa
     update(chart, highlight) {
       list.replaceChildren(
         ...(chart?.palette ?? []).map((entry, i) =>
-          el('div', { attrs: { role: 'listitem' } }, [
+          el('div', { className: 'palette-panel__item', attrs: { role: 'listitem' } }, [
             PaletteRow({ entry, selected: highlight === i, onToggle: () => onToggle(i) }),
+            spotlightButton(entry.number, () => onSpotlight(i)),
           ]),
         ),
       );
