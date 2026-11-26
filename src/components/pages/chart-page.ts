@@ -1,8 +1,8 @@
 import { DEFAULT_PAINTING_ID, PAINTINGS, paintingUrl, type Painting } from '../../data/paintings';
 import { resolveCrop } from '../../lib/crop';
 import { paletteToText } from '../../lib/export';
-import { loadImageData } from '../../lib/image';
-import { buildChart, countColors, type Chart } from '../../lib/quantize';
+import { loadPixels } from '../../lib/image';
+import { buildChart, countColors, type Chart, type PixelSource } from '../../lib/quantize';
 import { fitCellSize } from '../../lib/render';
 import { ChartSummary } from '../molecules';
 import type { PrintOptions } from '../../lib/print';
@@ -33,7 +33,7 @@ function savePaintingId(id: string): void {
  */
 export function ChartPage(): HTMLElement {
   const state: {
-    source: ImageData | null;
+    source: PixelSource | null;
     title: string;
     currentId: string | null;
     chart: Chart | null;
@@ -110,7 +110,7 @@ export function ChartPage(): HTMLElement {
     picker.setSelected(painting.id);
     savePaintingId(painting.id);
     try {
-      const source = await loadImageData(paintingUrl(painting));
+      const source = await loadPixels(paintingUrl(painting));
       if (state.currentId !== painting.id) return; // another painting was picked meanwhile
       palette.notify('');
       state.source = source;
